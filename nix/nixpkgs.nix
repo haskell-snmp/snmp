@@ -6,7 +6,7 @@ with rec {
     owner  = "NixOS";
     repo   = "nixpkgs";
     rev    = "cecec1f74468766825c2ad32d8388c2ded36225f";
-    sha256 = "sq538wy0shbakah27b6n4bl5amzwkzjsds77vdd8rsq0d1nys4w";
+    sha256 = "1sq538wy0shbakah27b6n4bl5amzwkzjsds77vdd8rsq0d1nys4w";
   };
 };
 
