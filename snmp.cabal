@@ -2,7 +2,7 @@ cabal-version: 2.4
 name:
   snmp
 version:
-  0.1.0.0
+  0.3.1.0
 synopsis:
   SNMP protocol library
 description:
@@ -41,15 +41,15 @@ library
     , bytestring >= 0.10 && < 0.11
     , containers >= 0.5 && < 0.7
     , cryptonite >= 0.20 && < 0.26
-    , ip >= 1.3 && < 1.5
+    , ip >= 1.3 && < 1.6
     , language-asn >= 0.1 && < 0.2
     , memory >= 0.14 && < 0.15
     , stm >= 2.4 && < 2.6
     , vector >= 0.11 && < 0.13
-    , network >= 2.8 && < 2.9
+    , network >= 3.0 && < 3.1
   hs-source-dirs:
     src
   default-language:
     Haskell2010
   ghc-options:
-    -Wall
+    -Wall -O2
