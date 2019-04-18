@@ -112,8 +112,8 @@ pdus = choice
   , PdusInformRequest <$> option "inform-request" (tag ContextSpecific 6 Implicit pdu)
     -- This is really silly, but 4 for originally used for traps, and then
     -- they switched it to 7. Realistically, it is necessary to support both.
-  , PdusSnmpTrap <$> option "snmpV2-trap" (tag ContextSpecific 4 Implicit trapPdu)
-  , PdusSnmpTrap <$> option "snmpV2-trap" (tag ContextSpecific 7 Implicit trapPdu)
+  , PdusSnmpTrap <$> option "trap" (tag ContextSpecific 4 Implicit trapPdu)
+  , PdusSnmpV2Trap <$> option "snmpV2-trap" (tag ContextSpecific 7 Implicit pdu)
   , PdusReport <$> option "report" (tag ContextSpecific 8 Implicit pdu)
   ]
 

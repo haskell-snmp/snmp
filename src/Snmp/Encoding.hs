@@ -137,8 +137,9 @@ pdus = choice
   PdusResponse p -> option 3 "response" p $ implicitTag (tagFromInt 2) pdu
   PdusSetRequest p -> option 4 "set-request" p $ implicitTag (tagFromInt 3) pdu
   PdusInformRequest p -> option 5 "inform-request" p $ implicitTag (tagFromInt 6) pdu
-  PdusSnmpTrap p -> option 6 "snmpV2-trap" p $ implicitTag (tagFromInt 4) trapPdu
-  PdusReport p -> option 7 "report" p $ implicitTag (tagFromInt 8) pdu
+  PdusSnmpTrap p -> option 6 "snmp-trap" p $ implicitTag (tagFromInt 4) trapPdu
+  PdusSnmpV2Trap p -> option 7 "snmpV2-trap" p $ implicitTag (tagFromInt 7) pdu
+  PdusReport p -> option 8 "report" p $ implicitTag (tagFromInt 8) pdu
 
 defaultObjectIdentifier :: ObjectIdentifier
 defaultObjectIdentifier = ObjectIdentifier (E.fromList [1,3,6])

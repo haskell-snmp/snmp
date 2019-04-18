@@ -57,6 +57,7 @@ data Pdus
   | PdusSetRequest !Pdu
   | PdusInformRequest !Pdu
   | PdusSnmpTrap !TrapPdu
+  | PdusSnmpV2Trap !Pdu
   | PdusReport !Pdu
   deriving (Eq,Show)
 
