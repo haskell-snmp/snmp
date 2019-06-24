@@ -19,6 +19,8 @@ module Snmp.Client
   , getBulkStep'
   , getBulkChildren
   , getBulkChildren'
+  , set
+  , set'
   ) where
 
 import Control.Applicative ((<|>))
@@ -345,6 +347,19 @@ nextSalt v = do
 throwSnmpException :: IO (Either SnmpException a) -> IO a
 throwSnmpException = (either throwIO return =<<)
 
+set :: Context -> ObjectIdentifier -> ObjectSyntax -> IO ()
+set ctx ident val = throwSnmpException (set' ctx ident val)
+
+set' :: Context -> ObjectIdentifier -> ObjectSyntax -> IO (Either SnmpException ())
+set' ctx ident val = generalRequest
+  (\reqId -> PdusSetRequest (Pdu reqId (ErrorStatus 0) (ErrorIndex 0) (Vector.singleton (VarBind ident (BindingResultValue val)))))
+  (\binds -> do
+    val' <- singleBindingValue ident =<< onlyBindings binds
+    when (val /= val') (Left SnmpExceptionSet)
+    Right () 
+  )
+  ctx
+
 get :: Context -> ObjectIdentifier -> IO ObjectSyntax
 get ctx ident = throwSnmpException (get' ctx ident)
 
@@ -425,6 +440,7 @@ data SnmpException
   | SnmpExceptionAuthenticationFailure !ByteString !ByteString
   | SnmpExceptionBadEngineId !MessageV3 !MessageV3
   | SnmpExceptionDecryptionFailure
+  | SnmpExceptionSet
   deriving (Show,Eq)
 
 instance Exception SnmpException
