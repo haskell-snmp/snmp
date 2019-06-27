@@ -21,6 +21,7 @@ module Snmp.Client
   , getBulkChildren'
   , set
   , set'
+  , setMany'
   ) where
 
 import Control.Applicative ((<|>))
@@ -31,6 +32,7 @@ import Control.Monad (replicateM,replicateM_,when,(<=<))
 import Control.Monad.STM (STM,atomically,check)
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
+import Data.Foldable (foldl')
 import Data.Functor (($>))
 import Data.IORef (IORef,readIORef,writeIORef,newIORef)
 import Data.Int (Int32)
@@ -44,7 +46,7 @@ import Net.Types (IPv4)
 import Text.Printf (printf)
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as LB
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import qualified Data.Vector as Vector
 import qualified Language.Asn.Decoding as AsnDecoding
 import qualified Language.Asn.Encoding as AsnEncoding
@@ -356,6 +358,20 @@ set' ctx ident val = generalRequest
   (\binds -> do
     val' <- singleBindingValue ident =<< onlyBindings binds
     when (val /= val') (Left SnmpExceptionSet)
+    Right () 
+  )
+  ctx
+
+setMany' :: Context -> Map ObjectIdentifier ObjectSyntax -> IO (Either SnmpException ())
+setMany' ctx m = generalRequest
+  (\reqId -> PdusSetRequest
+    (Pdu reqId (ErrorStatus 0) (ErrorIndex 0)
+    (Vector.fromList (Map.foldrWithKey (\k v xs -> VarBind k (BindingResultValue v) : xs) [] m)))
+  )
+  (\binds -> do
+    r <- onlyBindings binds
+    let r' = foldl' (\y (VarBind k v) -> Map.insert k v y) Map.empty r
+    when (fmap BindingResultValue m /= r') (Left SnmpExceptionSet)
     Right () 
   )
   ctx
