@@ -315,7 +315,7 @@ generalRequest pdusFromRequestId fromPdu (Context session (Destination ip port) 
                                   case messageV3Data msg of
                                     ScopedPduDataEncrypted encrypted -> case crypto of
                                      NoAuthNoPriv -> error "internal library error: messageV3Data NoAuthPriv"
-                                     AuthNoPriv _ -> error "internal library error: messageV3Data (AuthNoPriv _)"  
+                                     AuthNoPriv _ -> error "internal library error: messageV3Data (AuthNoPriv _)"
                                      AuthPriv (AuthParameters authType _) (PrivParameters privType privPass) -> do
                                         let usm = messageV3SecurityParameters msg
                                         key <- passwordToKeyCached authType privPass (usmAuthoritativeEngineId usm)
@@ -334,7 +334,7 @@ generalRequest pdusFromRequestId fromPdu (Context session (Destination ip port) 
       let originalPhv3 = PerHostV3 (EngineId "initial-engine-id") 0xFFFFFF 0xEEEEEE
       theSalt <- atomically $ nextSalt (sessionAesSalt session)
       requestId' <- nextRequestId (sessionRequestId session)
-      theFragment <- fullMakeBs theSalt requestId' originalPhv3 
+      theFragment <- fullMakeBs theSalt requestId' originalPhv3
       e <- go1 (sessionMaxTries session) requestId' theFragment False
       writeChan (sessionSockets session) sock
       return (e >>= fromPdu)
@@ -358,7 +358,7 @@ set' ctx ident val = generalRequest
   (\binds -> do
     val' <- singleBindingValue ident =<< onlyBindings binds
     when (val /= val') (Left SnmpExceptionSet)
-    Right () 
+    Right ()
   )
   ctx
 
@@ -372,7 +372,7 @@ setMany' ctx m = generalRequest
     r <- onlyBindings binds
     let r' = foldl' (\y (VarBind k v) -> Map.insert k v y) Map.empty r
     when (fmap BindingResultValue m /= r') (Left SnmpExceptionSet)
-    Right () 
+    Right ()
   )
   ctx
 
@@ -473,7 +473,7 @@ nextRequestId requestIdVar = atomically $ do
   return (RequestId i3)
 
 mySockFd :: NS.Socket -> IO System.Posix.Types.Fd
-mySockFd s = fmap System.Posix.Types.Fd (NS.fdSocket s)
+mySockFd s = NS.withFdSocket s (pure . System.Posix.Types.Fd)
 
 hexByteStringInternal :: ByteString -> String
 hexByteStringInternal = ByteString.foldr (\w xs -> printf "%02X" w ++ xs) []
