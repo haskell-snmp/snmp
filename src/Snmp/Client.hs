@@ -158,10 +158,13 @@ generalRequest pdusFromRequestId fromPdu (Context session (Destination ip port) 
                 then return $ Left $ SnmpExceptionNotAllBytesSent bytesSentLen bsLen
                 else do
                   let go2 mperHostV3 = do
-                        (isReadyAction,deregister) <- threadWaitReadSTM =<< mySockFd sock
-                        delay <- registerDelay (sessionTimeoutMicroseconds session)
-                        isContentReady <- atomically $ (isReadyAction $> True) <|> (fini delay $> False)
-                        deregister
+                        isContentReady <- NS.withFdSocket sock $ \fdi -> do
+                          let fd = System.Posix.Types.Fd fdi
+                          (isReadyAction,deregister) <- threadWaitReadSTM fd
+                          delay <- registerDelay (sessionTimeoutMicroseconds session)
+                          isContentReady <- atomically $ (isReadyAction $> True) <|> (fini delay $> False)
+                          deregister
+                          pure isContentReady
                         if not isContentReady
                           then go1 (n1 - 1)
                           else do
@@ -252,10 +255,13 @@ generalRequest pdusFromRequestId fromPdu (Context session (Destination ip port) 
                 else do
                   let go2 :: IO (Either SnmpException Pdu)
                       go2 = do
-                        (isReadyAction,deregister) <- threadWaitReadSTM =<< mySockFd sock
-                        delay <- registerDelay (sessionTimeoutMicroseconds session)
-                        isContentReady <- atomically $ (isReadyAction $> True) <|> (fini delay $> False)
-                        deregister
+                        isContentReady <- NS.withFdSocket sock $ \fdi -> do
+                          let fd = System.Posix.Types.Fd fdi
+                          (isReadyAction,deregister) <- threadWaitReadSTM fd
+                          delay <- registerDelay (sessionTimeoutMicroseconds session)
+                          isContentReady <- atomically $ (isReadyAction $> True) <|> (fini delay $> False)
+                          deregister
+                          pure isContentReady
                         if not isContentReady
                           then do
                             when inDebugMode $ putStrLn "NO RESPONSE"
@@ -471,9 +477,6 @@ nextRequestId requestIdVar = atomically $ do
       !i3 = if i2 == 0 then 1 else i2
   writeTVar requestIdVar (RequestId i3)
   return (RequestId i3)
-
-mySockFd :: NS.Socket -> IO System.Posix.Types.Fd
-mySockFd s = NS.withFdSocket s (pure . System.Posix.Types.Fd)
 
 hexByteStringInternal :: ByteString -> String
 hexByteStringInternal = ByteString.foldr (\w xs -> printf "%02X" w ++ xs) []
