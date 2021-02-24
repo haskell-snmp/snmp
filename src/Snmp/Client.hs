@@ -70,7 +70,9 @@ data Session = Session
   }
 
 data Config = Config
-  { configSocketPoolSize :: !Int
+  { configBindAddress :: !String
+    -- ^ Put @0.0.0.0@ for this if you do not know what you want.
+  , configSocketPoolSize :: !Int
   , configTimeoutMicroseconds :: !Int
   , configRetries :: !Int
   } deriving (Show,Eq)
@@ -110,10 +112,10 @@ data PerHostV3 = PerHostV3
 
 -- | Only one connection can be open at a time on a given port.
 openSession :: Config -> IO Session
-openSession (Config socketPoolSize timeout retries) = do
+openSession (Config bindAddress socketPoolSize timeout retries) = do
   addrinfos <- NS.getAddrInfo
     (Just (NS.defaultHints {NS.addrFlags = [NS.AI_PASSIVE]}))
-    (Just "0.0.0.0")
+    (Just bindAddress)
     Nothing
   let serveraddr = head addrinfos
   allSockets <- replicateM socketPoolSize $ do
