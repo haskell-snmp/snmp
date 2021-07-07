@@ -6,8 +6,13 @@ module Snmp.Types where
 import Language.Asn.Types
 import Data.Int (Int32)
 import Data.Word (Word8,Word32,Word64)
+import Data.Bool (bool)
 import Data.ByteString (ByteString)
+import Data.ByteString.Char8 (all)
+import Data.ByteString.Builder (byteStringHex, toLazyByteString)
+import Data.Char (isPrint)
 import Data.Vector (Vector)
+import Prelude hiding (all)
 
 newtype RequestId = RequestId { getRequestId :: Int }
   deriving (Eq,Ord,Show,Read)
@@ -25,7 +30,13 @@ data SimpleSyntax
   = SimpleSyntaxInteger !Int32
   | SimpleSyntaxString !ByteString
   | SimpleSyntaxObjectId !ObjectIdentifier
-  deriving (Eq,Show)
+  deriving (Eq)
+
+instance Show SimpleSyntax where
+  show (SimpleSyntaxInteger v) = "SimpleSyntaxInteger " <> show v
+  show (SimpleSyntaxObjectId v) = "SimpleSyntaxObjectId " <> show v
+  show (SimpleSyntaxString v) = "SimpleSyntaxString "
+    <> bool (show $ (toLazyByteString . byteStringHex) v) (show v) (all isPrint v)
 
 data ApplicationSyntax
   = ApplicationSyntaxIpAddress !Word32
